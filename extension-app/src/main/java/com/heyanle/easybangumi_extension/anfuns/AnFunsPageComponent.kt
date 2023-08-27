@@ -54,11 +54,9 @@ class AnFunsPageComponent(source: AnFunsSource) : ComponentWrapper(source), Page
         for (em in modules){
             val moduleHeading = em.select(".hl-rb-head").first()
             val type = moduleHeading?.select(".hl-rb-title")
-            val label = type?.text()?:""
+            val label = type?.text()?:continue
             if (label == "每周更新" || label == "网络资讯" || label == "动漫专题") continue
-
             val lis = em.select(".row").select("ul").select("li")
-
             val page = SourcePage.SingleCartoonPage.WithCover(
                 label = label,
                 firstKey = { 0 },

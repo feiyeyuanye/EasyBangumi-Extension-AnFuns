@@ -28,9 +28,9 @@ class AnFunsSource: ExtensionSource(), ExtensionIconSource {
     override val label: String
         get() = "AnFuns动漫"
     override val version: String
-        get() = "1.0"
+        get() = "1.2"
     override val versionCode: Int
-        get() = 0
+        get() = 2
 
     override val sourceKey: String
         get() = "anfuns"

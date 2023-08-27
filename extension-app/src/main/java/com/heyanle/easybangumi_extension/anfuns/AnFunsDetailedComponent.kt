@@ -31,6 +31,7 @@ import org.jsoup.nodes.Document
 class AnFunsDetailedComponent(
     source: AnFunsSource
 ) : ComponentWrapper(source), DetailedComponent, UpdateComponent, PlayComponent {
+    private val playUrlTemp: MutableList<MutableList<String>> = ArrayList()
 
     override suspend fun getDetailed(summary: CartoonSummary): SourceResult<Cartoon> {
         return withResult(Dispatchers.IO) {
@@ -87,10 +88,9 @@ class AnFunsDetailedComponent(
             .execute().body?.string() ?: throw NullPointerException()
         return Jsoup.parse(d)
     }
-    private var lastCartoonSummary: CartoonSummary? = null
-    private val playUrlTemp: MutableList<MutableList<String>> = ArrayList()
     private fun playLine(document: Document, summary: CartoonSummary): List<PlayLine> {
-        Log.e("TAG","playLine")
+        Log.e("TAG","------->>>>>>>playLine")
+        if (playUrlTemp.size>0) playUrlTemp.clear()
         val res = arrayListOf<PlayLine>()
         val module = document.select(".hl-play-source").first() ?: return res
         val playNameList = module.select(".hl-plays-wrap").first()?.select("a") ?: return res
@@ -111,9 +111,7 @@ class AnFunsDetailedComponent(
                     label = playName,
                     episode = es
                 )
-                playUrlTemp.clear()
                 playUrlTemp.add(dataApiList)
-                lastCartoonSummary = summary
                 res.add(playLine)
             }
         }
@@ -130,12 +128,9 @@ class AnFunsDetailedComponent(
             if (episodeIndex < 0) {
                 throw IndexOutOfBoundsException()
             }
-            if(lastCartoonSummary != summary || playUrlTemp.isEmpty()){
-                getPlayLine(summary)
-            }
 //            Log.e("TAG","${playUrlTemp[playLine.id.toInt()]}") // [/play/632-1-1.html]
             val url = url(playUrlTemp[playLine.id.toInt()][episodeIndex])
-//            Log.e("TAG","$url") // https://www.anfuns.cc/play/632-1-1.html
+//            Log.e("TAG", url) // https://www.anfuns.cc/play/632-1-1.html
             var videoUrl = withTimeoutOrNull(10 * 1000) {
                 webViewHelper.interceptResource(
                     url, ".*\\b(mp4|m3u8)\\b.*",
@@ -167,6 +162,8 @@ class AnFunsDetailedComponent(
         }
     }
     private fun detailed(document: Document, summary: CartoonSummary): Cartoon {
+        Log.e("TAG","------->>>>>>>detailed")
+
         var desc = ""
         var update = 0
         var status = 0
